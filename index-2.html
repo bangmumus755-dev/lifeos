@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LifeOS</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FAFAF8">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+/* ============================================
+   LIFEOS — minimalist, elegant, generous whitespace
+   Palette: warm off-white, near-black ink, deep teal accent
+   Type: serif display (Georgia) + clean sans body
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --surface-2: #F2F1ED;
+  --ink: #1C1C1A;
+  --ink-soft: #5C5B57;
+  --ink-faint: #9A9892;
+  --line: #E4E2DC;
+  --accent: #2D5F5D;
+  --accent-soft: #E8EEED;
+  --accent-ink: #FFFFFF;
+  --warn: #B5532C;
+  --good: #3F7A5C;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --font-display: 'Source Serif 4', Georgia, serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --fontSize: 15px;
+  --maxw: 1180px;
+}
+
+body.dark {
+  --bg: #161614;
+  --surface: #1F1F1C;
+  --surface-2: #282824;
+  --ink: #F2F1EC;
+  --ink-soft: #B7B5AE;
+  --ink-faint: #767469;
+  --line: #36352F;
+  --accent: #6FB5AE;
+  --accent-soft: #25332F;
+  --accent-ink: #0F1714;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fontSize);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background .25s ease, color .25s ease;
+}
+
+h1, h2, h3, .serif { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; }
+
+/* ===== LAYOUT SHELL ===== */
+.shell { display: flex; min-height: 100vh; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 232px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  padding: 32px 18px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  padding: 0 10px 28px;
+  letter-spacing: -0.02em;
+}
+.brand .dot { color: var(--accent); }
+
+.nav-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  padding: 18px 10px 8px;
+  font-weight: 600;
+}
+.nav-label:first-of-type { padding-top: 0; }
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.nav-btn:hover { background: var(--surface-2); color: var(--ink); }
+.nav-btn.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.nav-icon { width: 16px; text-align: center; opacity: .8; font-size: 14px; }
+
+/* ===== TOP BAR ===== */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 40px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.topbar .clock {
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.topbar .clock b { color: var(--ink-soft); font-weight: 500; }
+
+/* ===== MAIN ===== */
+.main-wrap { flex: 1; min-width: 0; }
+.main {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 40px;
+}
+
+.section { display: none; animation: fadeUp .3s ease; }
+.section.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none; } }
+
+.page-head { margin-bottom: 32px; }
+.page-head h1 { font-size: 28px; margin-bottom: 6px; }
+.page-head p { color: var(--ink-soft); font-size: 14px; }
+
+/* ===== GRID ===== */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* ===== CARD ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 26px;
+  margin-bottom: 20px;
+}
+.card h2 {
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--ink);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card .hint { font-size: 12.5px; color: var(--ink-faint); margin-top: -10px; margin-bottom: 16px; }
+
+/* ===== INPUTS ===== */
+label.field-label {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+
+input:not([type=color]):not([type=range]):not([type=file]),
+textarea, select {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s;
+}
+input:not([type=color]):not([type=range]):not([type=file]):focus,
+textarea:focus, select:focus { border-color: var(--accent); }
+textarea { resize: vertical; line-height: 1.6; }
+
+input[type=color] { width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; background: none; padding: 3px; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: all .15s;
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); width: 100%; margin-top: 12px; }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-outline { background: transparent; border-color: var(--line); color: var(--ink-soft); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: transparent; border-color: var(--warn); color: var(--warn); }
+.btn-danger:hover { background: var(--warn); color: #fff; }
+.btn-sm { padding: 7px 12px; font-size: 12.5px; width: auto; margin-top: 0; }
+.btn-block { width: 100%; }
+
+.row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.row .btn { flex: 1; margin-top: 0; }
+
+/* ===== LISTS ===== */
+ul.task-list { list-style: none; margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+ul.task-list li {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 13px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  font-size: 13.5px;
+  gap: 8px;
+}
+ul.task-list li .del-btn { background: none; border: none; color: var(--ink-faint); cursor: pointer; font-size: 14px; flex-shrink: 0; padding: 2px 4px; }
+ul.task-list li .del-btn:hover { color: var(--warn); }
+.empty-state { padding: 20px; text-align: center; color: var(--ink-faint); font-size: 13px; }
+
+/* ===== STATS ===== */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+}
+.stat-card .label { font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: 8px; }
+.stat-card .value { font-family: var(--font-display); font-size: 30px; color: var(--ink); }
+.stat-card .value.accent { color: var(--accent); }
+.stat-card .value.small { font-size: 19px; }
+
+progress { width: 100%; height: 8px; border-radius: 8px; overflow: hidden; border: none; background: var(--surface-2); }
+progress::-webkit-progress-bar { background: var(--surface-2); }
+progress::-webkit-progress-value { background: var(--accent); border-radius: 8px; }
+
+/* ===== CALENDAR ===== */
+#calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 14px; }
+.dayName { text-align: center; font-size: 11px; font-weight: 600; color: var(--ink-faint); padding: 6px 0; }
+.day {
+  background: var(--surface-2);
+  padding: 12px 4px;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-soft);
+  transition: all .15s;
+  border: 1px solid transparent;
+}
+.day:hover { border-color: var(--accent); color: var(--accent); }
+.today { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.has-note { box-shadow: inset 0 -2px 0 var(--warn); }
+
+/* ===== MODAL ===== */
+.modal-overlay { position: fixed; inset: 0; background: rgba(28,28,26,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
+.modal-overlay.active { display: flex; }
+.modal-box { background: var(--surface); border-radius: var(--radius-lg); padding: 26px; width: 90%; max-width: 420px; border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,0.12); animation: modalIn .18s ease; }
+@keyframes modalIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+.modal-box h3 { font-size: 16px; margin-bottom: 14px; }
+.modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+.modal-actions .btn { flex: 1; margin-top: 0; }
+
+/* ===== HABIT ===== */
+.habit-item { padding: 14px; background: var(--surface-2); border-radius: 10px; margin-bottom: 8px; }
+.habit-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.habit-top .name { font-size: 14px; font-weight: 500; }
+.streak-badge { font-size: 11px; font-weight: 600; color: var(--warn); background: rgba(181,83,44,0.1); padding: 3px 8px; border-radius: 20px; }
+.habit-days { display: flex; gap: 5px; }
+.habit-day-dot { width: 22px; height: 22px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--ink-faint); transition: .15s; }
+.habit-day-dot.checked { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* ===== SEARCH ===== */
+.search-box { position: relative; margin-bottom: 14px; }
+.search-box input { padding-left: 34px; }
+.search-icon { position: absolute; left: 11px; top: 11px; opacity: .4; font-size: 14px; }
+
+/* ===== CHART ===== */
+.chart-wrap { position: relative; height: 230px; margin-top: 10px; }
+.chart-wrap.short { height: 190px; }
+
+/* ===== AI CHAT ===== */
+#chatBox { height: 380px; overflow-y: auto; background: var(--bg); border: 1px solid var(--line); padding: 18px; border-radius: 10px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px; }
+.ai-msg, .user-msg { padding: 10px 14px; border-radius: 10px; max-width: 78%; font-size: 13.5px; line-height: 1.5; }
+.ai-msg { background: var(--accent-soft); color: var(--ink); align-self: flex-start; }
+.user-msg { background: var(--ink); color: var(--bg); align-self: flex-end; }
+.ai-typing { font-size: 12.5px; color: var(--ink-faint); padding: 2px 4px; align-self: flex-start; }
+.chat-row { display: flex; gap: 8px; }
+.chat-row input { margin: 0; }
+
+/* ===== FINANCE ===== */
+.finance-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+.fin-box { background: var(--surface-2); padding: 15px; border-radius: 10px; text-align: center; }
+.fin-box .l { font-size: 10.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; font-weight: 600; }
+.fin-box .v { font-family: var(--font-display); font-size: 17px; }
+.fin-box.income .v { color: var(--good); }
+.fin-box.expense .v { color: var(--warn); }
+.fin-box.balance .v { color: var(--accent); }
+hr.divider { border: none; border-top: 1px solid var(--line); margin: 18px 0; }
+@media (max-width: 560px) { .finance-summary { grid-template-columns: 1fr; } }
+
+/* ===== RESULT DISPLAYS ===== */
+.result-display { margin-top: 16px; padding: 20px; background: var(--surface-2); border-radius: 10px; text-align: center; }
+.result-display .big { font-family: var(--font-display); font-size: 38px; color: var(--accent); }
+.result-display .tag { font-size: 13px; color: var(--ink-soft); margin-top: 6px; }
+.timer-display { font-family: var(--font-display); font-size: 44px; text-align: center; color: var(--ink); padding: 10px 0; font-variant-numeric: tabular-nums; }
+.pw-box { background: var(--surface-2); padding: 16px; border-radius: 10px; font-family: 'SF Mono', Consolas, monospace; font-size: 15px; text-align: center; letter-spacing: 1px; margin-top: 12px; word-break: break-all; color: var(--ink); min-height: 20px; border: 1px solid var(--line); }
+.color-preview { height: 84px; border-radius: 10px; margin-top: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 17px; letter-spacing: 1px; border: 1px solid var(--line); }
+
+/* ===== TOAST ===== */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: var(--bg); padding: 12px 20px; border-radius: 10px; font-size: 13.5px; font-weight: 500; z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,0.15); animation: toastIn .25s ease; }
+@keyframes toastIn { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform:none; } }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 880px) {
+  .sidebar { position: fixed; left: -240px; z-index: 200; transition: left .2s; box-shadow: 0 0 40px rgba(0,0,0,0.15); }
+  .sidebar.open { left: 0; }
+  .menu-toggle { display: flex !important; }
+  .main { padding: 24px 20px; }
+  .topbar { padding: 16px 20px; }
+}
+.menu-toggle { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); cursor: pointer; font-size: 16px; }
+.sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 150; }
+.sidebar-backdrop.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+
+<div class="shell">
+
+  <!-- ===== SIDEBAR ===== -->
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">LifeOS<span class="dot">.</span></div>
+
+    <div class="nav-label">Ringkasan</div>
+    <button class="nav-btn active" data-sec="dashboard" onclick="navigate('dashboard',this)"><span class="nav-icon">◷</span>Dashboard</button>
+
+    <div class="nav-label">Produktivitas</div>
+    <button class="nav-btn" data-sec="notes" onclick="navigate('notes',this)"><span class="nav-icon">✎</span>Catatan</button>
+    <button class="nav-btn" data-sec="todo" onclick="navigate('todo',this)"><span class="nav-icon">✓</span>To Do</button>
+    <button class="nav-btn" data-sec="habit" onclick="navigate('habit',this)"><span class="nav-icon">◎</span>Habit</button>
+    <button class="nav-btn" data-sec="study" onclick="navigate('study',this)"><span class="nav-icon">▤</span>Studi</button>
+    <button class="nav-btn" data-sec="calendar" onclick="navigate('calendar',this)"><span class="nav-icon">▦</span>Kalender</button>
+
+    <div class="nav-label">Keuangan</div>
+    <button class="nav-btn" data-sec="finance" onclick="navigate('finance',this)"><span class="nav-icon">◈</span>Finance</button>
+
+    <div class="nav-label">Tools</div>
+    <button class="nav-btn" data-sec="calculator" onclick="navigate('calculator',this)"><span class="nav-icon">±</span>Kalkulator</button>
+    <button class="nav-btn" data-sec="stopwatch" onclick="navigate('stopwatch',this)"><span class="nav-icon">◴</span>Stopwatch</button>
+    <button class="nav-btn" data-sec="bmi" onclick="navigate('bmi',this)"><span class="nav-icon">⚖</span>BMI</button>
+    <button class="nav-btn" data-sec="password" onclick="navigate('password',this)"><span class="nav-icon">⚿</span>Password</button>
+    <button class="nav-btn" data-sec="color" onclick="navigate('color',this)"><span class="nav-icon">◐</span>Warna</button>
+
+    <div class="nav-label">Lainnya</div>
+    <button class="nav-btn" data-sec="ai" onclick="navigate('ai',this)"><span class="nav-icon">✦</span>AI Chat</button>
+    <button class="nav-btn" data-sec="notif" onclick="navigate('notif',this)"><span class="nav-icon">◔</span>Notifikasi</button>
+    <button class="nav-btn" data-sec="backup" onclick="navigate('backup',this)"><span class="nav-icon">⇅</span>Backup</button>
+    <button class="nav-btn" data-sec="settings" onclick="navigate('settings',this)"><span class="nav-icon">⚙</span>Pengaturan</button>
+  </nav>
+
+  <div class="main-wrap">
+    <!-- ===== TOPBAR ===== -->
+    <div class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="clock" id="clock">—</div>
+    </div>
+
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div id="sec-dashboard" class="section active">
+        <div class="page-head">
+          <h1>Dashboard</h1>
+          <p id="greetUser">Selamat datang kembali.</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="label">Catatan</div><div class="value" id="statNotes">0</div></div>
+          <div class="stat-card"><div class="label">To Do Aktif</div><div class="value" id="statTodo">0</div></div>
+          <div class="stat-card"><div class="label">Habit</div><div class="value" id="statHabit">0</div></div>
+          <div class="stat-card"><div class="label">Saldo</div><div class="value accent small" id="statBalance">Rp0</div></div>
+        </div>
+        <div class="card">
+          <h2>Produktivitas hari ini</h2>
+          <progress id="progressBar" value="0" max="100"></progress>
+          <p class="hint" id="progressText" style="margin-top:10px;">0%</p>
+        </div>
+      </div>
+
+      <!-- NOTES -->
+      <div id="sec-notes" class="section">
+        <div class="page-head"><h1>Catatan</h1><p>Tulis dan simpan pikiranmu.</p></div>
+        <div class="card">
+          <div class="search-box">
+            <span class="search-icon">⌕</span>
+            <input id="noteSearch" placeholder="Cari di catatan..." oninput="searchNote()">
+          </div>
+          <textarea id="note" rows="12" placeholder="Tulis catatan kamu di sini..."></textarea>
+          <button class="btn btn-primary" onclick="saveNote()">Simpan Catatan</button>
+          <p class="hint" id="searchResult" style="margin-top:10px;"></p>
+        </div>
+      </div>
+
+      <!-- TODO -->
+      <div id="sec-todo" class="section">
+        <div class="page-head"><h1>To Do</h1><p>Kelola tugas harianmu.</p></div>
+        <div class="card">
+          <div class="field">
+            <input id="todoInput" placeholder="Tambah tugas baru..." onkeypress="if(event.key==='Enter')addTodo()">
+          </div>
+          <button class="btn btn-primary" onclick="addTodo()">Tambah Tugas</button>
+          <ul class="task-list" id="todoList"></ul>
+        </div>
+      </div>
+
+      <!-- HABIT -->
+      <div id="sec-habit" class="section">
+        <div class="page-head"><h1>Habit Tracker</h1><p>Bangun kebiasaan, lacak konsistensimu.</p></div>
+        <div class="card">
+          <div class="field">
+            <input id="habitInput" placeholder="Masukkan kebiasaan baru..." onkeypress="if(event.key==='Enter')habitTambah()">
+          </div>
+          <button class="btn btn-primary" onclick="habitTambah()">Tambah Habit</button>
+          <div id="habitList" style="margin-top:16px;"></div>
+        </div>
+      </div>
+
+      <!-- STUDY -->
+      <div id="sec-study" class="section">
+        <div class="page-head"><h1>Studi</h1><p>Catat waktu belajarmu.</p></div>
+        <div class="card">
+          <div class="grid-2">
+            <div class="field"><input id="studySubject" placeholder="Mata pelajaran / topik"></div>
+            <div class="field"><input type="number" id="studyMinutes" placeholder="Durasi (menit)"></div>
+          </div>
+          <button class="btn btn-primary" onclick="addStudy()">Catat Sesi Belajar</button>
+          <hr class="divider">
+          <div id="studyList"></div>
+          <p class="hint" id="studyTotal" style="margin-top:10px;"></p>
+        </div>
+        <div class="card">
+          <h2>Waktu belajar per topik</h2>
+          <div class="chart-wrap"><canvas id="studyChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div id="sec-calendar" class="section">
+        <div class="page-head"><h1>Kalender</h1><p>Klik tanggal untuk menambah catatan.</p></div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <button class="btn btn-outline btn-sm" onclick="prevMonth()">← Prev</button>
+            <h2 id="monthYear" style="margin:0;"></h2>
+            <button class="btn btn-outline btn-sm" onclick="nextMonth()">Next →</button>
+          </div>
+          <div id="calendar"></div>
+        </div>
+      </div>
+
+      <!-- FINANCE -->
+      <div id="sec-finance" class="section">
+        <div class="page-head"><h1>Finance</h1><p>Pantau pemasukan dan pengeluaranmu.</p></div>
+        <div class="card">
+          <div class="finance-summary">
+            <div class="fin-box income"><div class="l">Pemasukan</div><div class="v" id="incomeTotal">Rp0</div></div>
+            <div class="fin-box expense"><div class="l">Pengeluaran</div><div class="v" id="expenseTotal">Rp0</div></div>
+            <div class="fin-box balance"><div class="l">Saldo</div><div class="v" id="balanceDisplay">Rp0</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label class="field-label">Pemasukan (Rp)</label><input type="number" id="incomeInput" placeholder="0"></div>
+            <div class="field"><label class="field-label">Pengeluaran (Rp)</label><input type="number" id="expenseInput" placeholder="0"></div>
+          </div>
+          <button class="btn btn-primary" onclick="addFinance()">Simpan Transaksi</button>
+          <hr class="divider">
+          <h2 style="font-size:13px;">Riwayat</h2>
+          <ul class="task-list" id="financeHistory"></ul>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>7 transaksi terakhir</h2>
+            <div class="chart-wrap"><canvas id="financeChart"></canvas></div>
+          </div>
+          <div class="card">
+            <h2>Distribusi saldo</h2>
+            <div class="chart-wrap short"><canvas id="financePie"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALCULATOR -->
+      <div id="sec-calculator" class="section">
+        <div class="page-head"><h1>Kalkulator</h1><p>Hitung ekspresi matematika.</p></div>
+        <div class="card">
+          <div class="field">
+            <input id="calcInput" placeholder="Contoh: 100 * 3 + 50 / 2" onkeypress="if(event.key==='Enter')hitung()">
+          </div>
+          <button class="btn btn-primary" onclick="hitung()">Hitung</button>
+          <div class="result-display" id="calcResultWrap" style="display:none;">
+            <div class="big" id="calcResult"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STOPWATCH -->
+      <div id="sec-stopwatch" class="section">
+        <div class="page-head"><h1>Stopwatch & Timer</h1><p>Lacak waktu dengan presisi.</p></div>
+        <div class="card">
+          <h2>Stopwatch</h2>
+          <div class="timer-display" id="stopwatch">00:00:00</div>
+          <div class="row">
+            <button class="btn btn-primary" onclick="startWatch()">Start</button>
+            <button class="btn btn-outline" onclick="stopWatch()">Stop</button>
+            <button class="btn btn-outline" onclick="resetWatch()">Reset</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Countdown Timer</h2>
+          <div class="field"><input type="number" id="timerInput" placeholder="Masukkan detik..."></div>
+          <button class="btn btn-primary" onclick="startTimer()">Mulai</button>
+          <div class="timer-display" id="timerDisplay" style="font-size:34px;">—</div>
+        </div>
+      </div>
+
+      <!-- BMI -->
+      <div id="sec-bmi" class="section">
+        <div class="page-head"><h1>BMI Calculator</h1><p>Hitung indeks massa tubuhmu.</p></div>
+        <div class="card">
+          <div class="grid-2">
+            <div class="field"><label class="field-label">Berat badan (kg)</label><input id="bb" placeholder="contoh: 65"></div>
+            <div class="field"><label class="field-label">Tinggi badan (cm)</label><input id="tb" placeholder="contoh: 170"></div>
+          </div>
+          <button class="btn btn-primary" onclick="bmi()">Hitung BMI</button>
+          <div class="result-display" id="bmiResultWrap" style="display:none;">
+            <div class="big" id="bmiValue"></div>
+            <div class="tag" id="bmiTag"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASSWORD -->
+      <div id="sec-password" class="section">
+        <div class="page-head"><h1>Password Generator</h1><p>Buat password yang kuat dan acak.</p></div>
+        <div class="card">
+          <div class="grid-2">
+            <div class="field"><label class="field-label">Panjang Password</label><input type="number" id="pwLength" value="20" min="8" max="64"></div>
+            <div class="field"><label class="field-label">Jenis Karakter</label>
+              <select id="pwType">
+                <option value="all">Semua karakter</option>
+                <option value="alpha">Huruf saja</option>
+                <option value="num">Angka saja</option>
+                <option value="alphanum">Huruf + Angka</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="generatePassword()">Generate Password</button>
+          <div class="pw-box" id="pwOutput">—</div>
+          <button class="btn btn-outline btn-block" onclick="copyPassword()" style="margin-top:10px;">Salin Password</button>
+        </div>
+      </div>
+
+      <!-- COLOR -->
+      <div id="sec-color" class="section">
+        <div class="page-head"><h1>Color Picker</h1><p>Pilih dan inspeksi warna.</p></div>
+        <div class="card">
+          <label class="field-label">Pilih Warna</label>
+          <input type="color" id="colorPicker" value="#2D5F5D">
+          <div class="color-preview" id="colorPreview">#2D5F5D</div>
+          <div class="grid-2" style="margin-top:12px;">
+            <div class="fin-box"><div class="l">R</div><div class="v" id="rVal" style="font-size:15px;">45</div></div>
+            <div class="fin-box"><div class="l">G</div><div class="v" id="gVal" style="font-size:15px;">95</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI CHAT -->
+      <div id="sec-ai" class="section">
+        <div class="page-head"><h1>AI Chat</h1><p>Asisten AI yang mengingat konteks percakapan dalam sesi ini.</p></div>
+        <div class="card" id="apiKeyCard">
+          <h2>Hubungkan API Key</h2>
+          <p class="hint">Untuk memakai AI Chat, masukkan API key Anthropic kamu sendiri. Key disimpan hanya di browser ini, tidak pernah dikirim ke server lain selain Anthropic.</p>
+          <div class="field"><input type="password" id="apiKeyInput" placeholder="sk-ant-..."></div>
+          <button class="btn btn-primary" onclick="saveApiKey()">Simpan API Key</button>
+          <p class="hint" style="margin-top:10px;">Belum punya key? Buat di <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent);">console.anthropic.com</a></p>
+        </div>
+        <div class="card" id="chatCard" style="display:none;">
+          <div id="chatBox">
+            <div class="ai-msg">Halo! Saya asisten AI LifeOS. Tanya apa saja.</div>
+          </div>
+          <div class="chat-row">
+            <input id="chatInput" placeholder="Ketik pesan..." onkeypress="if(event.key==='Enter')sendChat()">
+            <button class="btn btn-primary btn-sm" onclick="sendChat()" style="white-space:nowrap;">Kirim</button>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn btn-outline" onclick="clearChat()">Hapus Riwayat</button>
+            <button class="btn btn-outline" onclick="changeApiKey()">Ganti API Key</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIF -->
+      <div id="sec-notif" class="section">
+        <div class="page-head"><h1>Notifikasi</h1><p>Jadwalkan pengingat browser.</p></div>
+        <div class="card">
+          <div class="field"><input id="notifText" placeholder="Isi pesan notifikasi..."></div>
+          <div class="field"><input type="number" id="notifDelay" placeholder="Delay dalam detik (default: 5)"></div>
+          <button class="btn btn-primary" onclick="scheduleNotification()">Kirim Notifikasi</button>
+          <p class="hint" style="margin-top:12px;">Pastikan izin notifikasi sudah diberikan di browser.</p>
+        </div>
+      </div>
+
+      <!-- BACKUP -->
+      <div id="sec-backup" class="section">
+        <div class="page-head"><h1>Backup & Laporan</h1><p>Amankan datamu atau cetak ringkasan.</p></div>
+        <div class="card">
+          <h2>Ekspor Data</h2>
+          <p class="hint">Download semua data LifeOS ke file JSON.</p>
+          <button class="btn btn-primary" onclick="exportData()">Ekspor Data</button>
+        </div>
+        <div class="card">
+          <h2>Impor Data</h2>
+          <p class="hint">Pulihkan data dari file backup.</p>
+          <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+        </div>
+        <div class="card">
+          <h2>Laporan Bulanan</h2>
+          <p class="hint">Cetak ringkasan produktivitas & keuangan.</p>
+          <button class="btn btn-primary" onclick="exportReport()">Cetak Laporan</button>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="sec-settings" class="section">
+        <div class="page-head"><h1>Pengaturan</h1><p>Sesuaikan tampilan LifeOS.</p></div>
+        <div class="card">
+          <div class="field">
+            <label class="field-label">Nama Pengguna</label>
+            <input id="userName" placeholder="Masukkan nama kamu">
+          </div>
+          <div class="field">
+            <label class="field-label">Warna Aksen</label>
+            <input type="color" id="themeColor" value="#2D5F5D">
+          </div>
+          <div class="field">
+            <label class="field-label">Ukuran Font — <span id="fontValue">15</span>px</label>
+            <input type="range" id="fontSize" min="12" max="20" value="15">
+          </div>
+          <div class="field">
+            <label class="field-label">Mode Tampilan</label>
+            <button class="btn btn-outline btn-block" onclick="toggleTheme()">Beralih Mode Gelap / Terang</button>
+          </div>
+          <div class="row" style="margin-top:18px;">
+            <button class="btn btn-primary" onclick="saveSettings()">Simpan</button>
+            <button class="btn btn-danger" onclick="resetSettings()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR MODAL -->
+<div class="modal-overlay" id="calModal">
+  <div class="modal-box">
+    <h3 id="calModalTitle">Catatan Tanggal</h3>
+    <textarea id="calModalText" rows="4" placeholder="Tulis catatan untuk tanggal ini..."></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeCalModal()">Batal</button>
+      <button class="btn btn-danger" onclick="deleteCalNote()">Hapus</button>
+      <button class="btn btn-primary" onclick="saveCalNote()" style="margin-top:0;">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===================== NAVIGATION ===================== */
+function navigate(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  closeSidebar();
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarBackdrop').classList.toggle('active');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('active');
+}
+
+/* ===================== TOAST ===================== */
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2400);
+}
+
+/* ===================== CLOCK ===================== */
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').innerHTML =
+    now.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long' }) +
+    ' &middot; <b>' + now.toLocaleTimeString('id-ID') + '</b>';
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ===================== NOTES ===================== */
+const noteEl = document.getElementById('note');
+noteEl.value = localStorage.note || '';
+
+function saveNote() {
+  localStorage.note = noteEl.value;
+  showToast('Catatan disimpan.');
+}
+
+function searchNote() {
+  const q = document.getElementById('noteSearch').value.trim().toLowerCase();
+  const result = document.getElementById('searchResult');
+  if (!q) { result.textContent = ''; return; }
+  const text = noteEl.value.toLowerCase();
+  const count = text.split(q).length - 1;
+  result.textContent = count > 0 ? `Ditemukan ${count} kecocokan untuk "${q}"` : `Tidak ditemukan "${q}"`;
+}
+
+/* ===================== TODO ===================== */
+let todos = JSON.parse(localStorage.todos || '[]');
+
+function renderTodos() {
+  const list = document.getElementById('todoList');
+  if (todos.length === 0) { list.innerHTML = '<li class="empty-state" style="background:none;">Belum ada tugas.</li>'; return; }
+  list.innerHTML = '';
+  todos.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span style="${t.done ? 'text-decoration:line-through;opacity:.45;' : ''}">${escapeHtml(t.text)}</span>
+      <div style="display:flex;gap:10px;">
+        <button class="del-btn" onclick="toggleTodo(${i})" title="Selesai">✓</button>
+        <button class="del-btn" onclick="deleteTodo(${i})" title="Hapus">✕</button>
+      </div>`;
+    list.appendChild(li);
+  });
+}
+function addTodo() {
+  const input = document.getElementById('todoInput');
+  if (!input.value.trim()) return;
+  todos.push({ text: input.value.trim(), done: false });
+  localStorage.todos = JSON.stringify(todos);
+  input.value = '';
+  renderTodos();
+}
+function deleteTodo(i) { if (!confirm('Hapus tugas ini?')) return; todos.splice(i,1); localStorage.todos = JSON.stringify(todos); renderTodos(); }
+function toggleTodo(i) { todos[i].done = !todos[i].done; localStorage.todos = JSON.stringify(todos); renderTodos(); }
+renderTodos();
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ===================== HABIT (streaks) ===================== */
+let habits = JSON.parse(localStorage.habitsV2 || '[]');
+if (!localStorage.habitsV2 && localStorage.habits) {
+  const old = JSON.parse(localStorage.habits || '[]');
+  habits = old.map(h => ({ name: h, log: {} }));
+  localStorage.habitsV2 = JSON.stringify(habits);
+}
+
+function todayKey(offset = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() - offset);
+  return d.toISOString().slice(0,10);
+}
+function calcStreak(log) {
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    if (log[todayKey(i)]) streak++;
+    else break;
+  }
+  return streak;
+}
+function renderHabits() {
+  const list = document.getElementById('habitList');
+  if (habits.length === 0) { list.innerHTML = '<div class="empty-state">Belum ada habit. Tambahkan satu di atas.</div>'; return; }
+  list.innerHTML = '';
+  habits.forEach((h, i) => {
+    const streak = calcStreak(h.log || {});
+    const div = document.createElement('div');
+    div.className = 'habit-item';
+    let dots = '';
+    for (let i2 = 6; i2 >= 0; i2--) {
+      const key = todayKey(i2);
+      const checked = h.log && h.log[key];
+      dots += `<div class="habit-day-dot ${checked ? 'checked' : ''}" onclick="toggleHabitDay(${i},'${key}')" title="${key}">${checked ? '✓' : ''}</div>`;
+    }
+    div.innerHTML = `
+      <div class="habit-top">
+        <span class="name">${escapeHtml(h.name)}</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${streak > 0 ? `<span class="streak-badge">${streak} hari</span>` : ''}
+          <button class="del-btn" onclick="deleteHabit(${i})">✕</button>
+        </div>
+      </div>
+      <div class="habit-days">${dots}</div>`;
+    list.appendChild(div);
+  });
+}
+function toggleHabitDay(i, key) {
+  if (!habits[i].log) habits[i].log = {};
+  habits[i].log[key] = !habits[i].log[key];
+  localStorage.habitsV2 = JSON.stringify(habits);
+  renderHabits();
+}
+function habitTambah() {
+  const input = document.getElementById('habitInput');
+  if (!input.value.trim()) return;
+  habits.push({ name: input.value.trim(), log: {} });
+  localStorage.habitsV2 = JSON.stringify(habits);
+  input.value = '';
+  renderHabits();
+}
+function deleteHabit(i) { if (!confirm('Hapus habit ini beserta riwayatnya?')) return; habits.splice(i,1); localStorage.habitsV2 = JSON.stringify(habits); renderHabits(); }
+renderHabits();
+
+/* ===================== FINANCE ===================== */
+let incomeTotal = Number(localStorage.incomeTotal) || 0;
+let expenseTotal = Number(localStorage.expenseTotal) || 0;
+let finHistory = JSON.parse(localStorage.finHistory || '[]');
+
+function updateFinance() {
+  document.getElementById('incomeTotal').textContent = 'Rp' + incomeTotal.toLocaleString('id-ID');
+  document.getElementById('expenseTotal').textContent = 'Rp' + expenseTotal.toLocaleString('id-ID');
+  const saldo = incomeTotal - expenseTotal;
+  const balEl = document.getElementById('balanceDisplay');
+  balEl.textContent = 'Rp' + saldo.toLocaleString('id-ID');
+  balEl.style.color = saldo < 0 ? 'var(--warn)' : 'var(--accent)';
+}
+function renderFinanceHistory() {
+  const list = document.getElementById('financeHistory');
+  if (finHistory.length === 0) { list.innerHTML = '<li class="empty-state" style="background:none;">Belum ada transaksi.</li>'; return; }
+  list.innerHTML = '';
+  [...finHistory].reverse().slice(0,20).forEach(h => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>+Rp${Number(h.income).toLocaleString('id-ID')} / -Rp${Number(h.expense).toLocaleString('id-ID')}</span><span style="font-size:11px;color:var(--ink-faint)">${h.date}</span>`;
+    list.appendChild(li);
+  });
+}
+let financeChartObj, financePieObj;
+function renderFinanceCharts() {
+  const css = getComputedStyle(document.body);
+  const inkSoft = css.getPropertyValue('--ink-soft').trim();
+  const line = css.getPropertyValue('--line').trim();
+  const good = css.getPropertyValue('--good').trim();
+  const warn = css.getPropertyValue('--warn').trim();
+  const accent = css.getPropertyValue('--accent').trim();
+
+  const last7 = finHistory.slice(-7);
+  const labels = last7.map(h => h.date);
+  const incomes = last7.map(h => h.income);
+  const expenses = last7.map(h => h.expense);
+
+  const ctx = document.getElementById('financeChart');
+  if (financeChartObj) financeChartObj.destroy();
+  financeChartObj = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label: 'Pemasukan', data: incomes, backgroundColor: good, borderRadius: 4 },
+      { label: 'Pengeluaran', data: expenses, backgroundColor: warn, borderRadius: 4 }
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: inkSoft, font: { family: 'Inter', size: 11 } } } },
+      scales: {
+        x: { ticks: { color: inkSoft, font: { size: 10 } }, grid: { display: false } },
+        y: { ticks: { color: inkSoft, font: { size: 10 } }, grid: { color: line } }
+      }
+    }
+  });
+
+  const pieCtx = document.getElementById('financePie');
+  if (financePieObj) financePieObj.destroy();
+  financePieObj = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: { labels: ['Pemasukan','Pengeluaran'], datasets: [{ data: [incomeTotal, expenseTotal], backgroundColor: [good, warn], borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: inkSoft, font: { family:'Inter', size: 11 } } } } }
+  });
+}
+function addFinance() {
+  const income = Number(document.getElementById('incomeInput').value) || 0;
+  const expense = Number(document.getElementById('expenseInput').value) || 0;
+  if (!income && !expense) return;
+  incomeTotal += income;
+  expenseTotal += expense;
+  localStorage.incomeTotal = incomeTotal;
+  localStorage.expenseTotal = expenseTotal;
+  finHistory.push({ income, expense, date: new Date().toLocaleDateString('id-ID') });
+  localStorage.finHistory = JSON.stringify(finHistory);
+  document.getElementById('incomeInput').value = '';
+  document.getElementById('expenseInput').value = '';
+  updateFinance(); renderFinanceHistory(); renderFinanceCharts();
+  showToast('Transaksi dicatat.');
+}
+updateFinance(); renderFinanceHistory();
+window.addEventListener('load', renderFinanceCharts);
+
+/* ===================== CALCULATOR ===================== */
+function hitung() {
+  const expr = document.getElementById('calcInput').value;
+  const wrap = document.getElementById('calcResultWrap');
+  const res = document.getElementById('calcResult');
+  if (!expr.trim()) return;
+  try {
+    if (!/^[0-9+\-*/().\s%]+$/.test(expr)) throw new Error('invalid chars');
+    const r = Function('"use strict"; return (' + expr + ')')();
+    res.textContent = '= ' + r;
+    res.style.color = 'var(--accent)';
+  } catch {
+    res.textContent = 'Ekspresi tidak valid';
+    res.style.color = 'var(--warn)';
+  }
+  wrap.style.display = 'block';
+}
+
+/* ===================== STOPWATCH ===================== */
+let sw = 0, swInterval;
+function startWatch() {
+  clearInterval(swInterval);
+  swInterval = setInterval(() => {
+    sw++;
+    const h = Math.floor(sw/3600), m = Math.floor((sw%3600)/60), s = sw%60;
+    document.getElementById('stopwatch').textContent =
+      String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }, 1000);
+}
+function stopWatch() { clearInterval(swInterval); }
+function resetWatch() { sw = 0; clearInterval(swInterval); document.getElementById('stopwatch').textContent = '00:00:00'; }
+
+let timerInt;
+function startTimer() {
+  clearInterval(timerInt);
+  let x = parseInt(document.getElementById('timerInput').value) || 0;
+  if (x <= 0) { showToast('Masukkan durasi dalam detik.'); return; }
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = x;
+  disp.style.color = 'var(--ink)';
+  timerInt = setInterval(() => {
+    x--;
+    disp.textContent = x;
+    if (x <= 10) disp.style.color = 'var(--warn)';
+    if (x <= 0) {
+      clearInterval(timerInt);
+      disp.textContent = 'Selesai';
+      disp.style.color = 'var(--accent)';
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('LifeOS', { body: 'Timer selesai!' });
+      }
+    }
+  }, 1000);
+}
+
+/* ===================== BMI ===================== */
+function bmi() {
+  const b = parseFloat(document.getElementById('bb').value);
+  const t = parseFloat(document.getElementById('tb').value) / 100;
+  const wrap = document.getElementById('bmiResultWrap');
+  if (!b || !t) { showToast('Isi berat dan tinggi badan dulu.'); return; }
+  const val = (b / (t * t)).toFixed(2);
+  let kat = '', color = '';
+  if (val < 18.5) { kat = 'Kurus — di bawah normal'; color = 'var(--warn)'; }
+  else if (val < 25) { kat = 'Normal — sehat'; color = 'var(--good)'; }
+  else if (val < 30) { kat = 'Gemuk — di atas normal'; color = '#C77B1E'; }
+  else { kat = 'Obesitas'; color = 'var(--warn)'; }
+  const bigEl = document.getElementById('bmiValue');
+  bigEl.textContent = val;
+  bigEl.style.color = color;
+  document.getElementById('bmiTag').textContent = kat;
+  wrap.style.display = 'block';
+}
+
+/* ===================== PASSWORD ===================== */
+function generatePassword() {
+  const len = parseInt(document.getElementById('pwLength').value) || 20;
+  const type = document.getElementById('pwType').value;
+  const chars = {
+    all: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*',
+    alpha: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+    num: '0123456789',
+    alphanum: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  };
+  const c = chars[type];
+  let p = '';
+  for (let i = 0; i < len; i++) p += c[Math.floor(Math.random() * c.length)];
+  document.getElementById('pwOutput').textContent = p;
+}
+function copyPassword() {
+  const pw = document.getElementById('pwOutput').textContent;
+  if (pw === '—' || !pw) { showToast('Generate password dulu.'); return; }
+  navigator.clipboard.writeText(pw).then(() => showToast('Password disalin.'));
+}
+
+/* ===================== COLOR PICKER ===================== */
+const picker = document.getElementById('colorPicker');
+function updateColorPreview() {
+  const hex = picker.value;
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  const bright = (r*299 + g*587 + b*114) / 1000;
+  const prev = document.getElementById('colorPreview');
+  prev.style.background = hex;
+  prev.style.color = bright > 150 ? '#1C1C1A' : '#FAFAF8';
+  prev.textContent = hex.toUpperCase();
+  document.getElementById('rVal').textContent = r;
+  document.getElementById('gVal').textContent = g;
+}
+picker.oninput = updateColorPreview;
+updateColorPreview();
+
+/* ===================== STUDY ===================== */
+let studySessions = JSON.parse(localStorage.studySessions || '[]');
+let studyChartObj;
+function renderStudy() {
+  const list = document.getElementById('studyList');
+  if (studySessions.length === 0) { list.innerHTML = '<div class="empty-state">Belum ada sesi belajar.</div>'; }
+  else {
+    list.innerHTML = '';
+    studySessions.slice(-10).reverse().forEach(s => {
+      const d = document.createElement('div');
+      d.style.cssText = 'display:flex;justify-content:space-between;padding:10px 13px;background:var(--surface-2);border-radius:8px;margin-bottom:6px;font-size:13.5px;';
+      d.innerHTML = `<span>${escapeHtml(s.subject)}</span><span style="color:var(--accent);font-weight:600;">${s.minutes} mnt</span>`;
+      list.appendChild(d);
+    });
+  }
+  const total = studySessions.reduce((a,b) => a + Number(b.minutes), 0);
+  document.getElementById('studyTotal').textContent = `Total: ${total} menit belajar`;
+  renderStudyChart();
+}
+function renderStudyChart() {
+  const css = getComputedStyle(document.body);
+  const inkSoft = css.getPropertyValue('--ink-soft').trim();
+  const line = css.getPropertyValue('--line').trim();
+  const accent = css.getPropertyValue('--accent').trim();
+  const bySubject = {};
+  studySessions.forEach(s => { bySubject[s.subject] = (bySubject[s.subject]||0) + Number(s.minutes); });
+  const ctx = document.getElementById('studyChart');
+  if (!ctx) return;
+  if (studyChartObj) studyChartObj.destroy();
+  studyChartObj = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: Object.keys(bySubject), datasets: [{ label: 'Menit', data: Object.values(bySubject), backgroundColor: accent, borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { ticks: { color: inkSoft, font:{size:10} }, grid: { display:false } }, y: { ticks: { color: inkSoft, font:{size:10} }, grid: { color: line } } } }
+  });
+}
+function addStudy() {
+  const subj = document.getElementById('studySubject').value.trim();
+  const mins = parseInt(document.getElementById('studyMinutes').value) || 0;
+  if (!subj || !mins) { showToast('Isi topik dan durasi.'); return; }
+  studySessions.push({ subject: subj, minutes: mins, date: new Date().toLocaleDateString('id-ID') });
+  localStorage.studySessions = JSON.stringify(studySessions);
+  document.getElementById('studySubject').value = '';
+  document.getElementById('studyMinutes').value = '';
+  renderStudy();
+  showToast('Sesi belajar dicatat.');
+}
+renderStudy();
+
+/* ===================== CALENDAR ===================== */
+const dayNames = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+let current = new Date();
+let calModalKey = null;
+
+function drawCalendar() {
+  const cal = document.getElementById('calendar');
+  cal.innerHTML = '';
+  dayNames.forEach(d => cal.innerHTML += `<div class="dayName">${d}</div>`);
+  const year = current.getFullYear(), month = current.getMonth();
+  document.getElementById('monthYear').textContent = monthNames[month] + ' ' + year;
+  const first = new Date(year, month, 1).getDay();
+  const last = new Date(year, month + 1, 0).getDate();
+  for (let i = 0; i < first; i++) cal.innerHTML += '<div></div>';
+  const now = new Date();
+  for (let d = 1; d <= last; d++) {
+    let cls = 'day';
+    if (d === now.getDate() && month === now.getMonth() && year === now.getFullYear()) cls += ' today';
+    if (localStorage.getItem('calendar-'+year+'-'+month+'-'+d)) cls += ' has-note';
+    cal.innerHTML += `<div class="${cls}" onclick="selectDate(${d},${year},${month})">${d}</div>`;
+  }
+}
+function prevMonth() { current.setMonth(current.getMonth()-1); drawCalendar(); }
+function nextMonth() { current.setMonth(current.getMonth()+1); drawCalendar(); }
+function selectDate(day, year, month) {
+  calModalKey = 'calendar-'+year+'-'+month+'-'+day;
+  document.getElementById('calModalTitle').textContent = `Catatan — ${day} ${monthNames[month]} ${year}`;
+  document.getElementById('calModalText').value = localStorage.getItem(calModalKey) || '';
+  document.getElementById('calModal').classList.add('active');
+}
+function closeCalModal() { document.getElementById('calModal').classList.remove('active'); calModalKey = null; }
+function saveCalNote() {
+  const text = document.getElementById('calModalText').value.trim();
+  if (text) { localStorage.setItem(calModalKey, text); showToast('Catatan disimpan.'); }
+  else localStorage.removeItem(calModalKey);
+  closeCalModal(); drawCalendar();
+}
+function deleteCalNote() { localStorage.removeItem(calModalKey); showToast('Catatan dihapus.'); closeCalModal(); drawCalendar(); }
+drawCalendar();
+
+/* ===================== DASHBOARD ===================== */
+function updateDashboard() {
+  const noteCount = (localStorage.note || '').trim() ? 1 : 0;
+  const todoCount = todos.filter(t => !t.done).length;
+  const habitCount = habits.length;
+  const saldo = incomeTotal - expenseTotal;
+  document.getElementById('statNotes').textContent = noteCount;
+  document.getElementById('statTodo').textContent = todoCount;
+  document.getElementById('statHabit').textContent = habitCount;
+  document.getElementById('statBalance').textContent = 'Rp' + saldo.toLocaleString('id-ID');
+  const total = Math.min((noteCount + todoCount + habitCount) * 10, 100);
+  document.getElementById('progressBar').value = total;
+  document.getElementById('progressText').textContent = total + '%';
+  const name = localStorage.userName || '';
+  document.getElementById('greetUser').textContent = name ? `Halo, ${name}. Selamat datang kembali.` : 'Selamat datang kembali.';
+}
+setInterval(updateDashboard, 1000);
+updateDashboard();
+
+/* ===================== AI CHAT ===================== */
+let chatHistory = JSON.parse(sessionStorage.chatHistory || '[]');
+
+function initApiKeyUI() {
+  const key = localStorage.lifeosApiKey || '';
+  if (key) {
+    document.getElementById('apiKeyCard').style.display = 'none';
+    document.getElementById('chatCard').style.display = 'block';
+    renderChatHistory();
+  } else {
+    document.getElementById('apiKeyCard').style.display = 'block';
+    document.getElementById('chatCard').style.display = 'none';
+  }
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) {
+    showToast('Format API key tidak valid. Harus diawali "sk-ant-".');
+    return;
+  }
+  localStorage.lifeosApiKey = key;
+  showToast('API key tersimpan di browser ini.');
+  initApiKeyUI();
+}
+
+function changeApiKey() {
+  if (!confirm('Hapus API key tersimpan dan masukkan yang baru?')) return;
+  localStorage.removeItem('lifeosApiKey');
+  document.getElementById('apiKeyInput').value = '';
+  initApiKeyUI();
+}
+
+function renderChatHistory() {
+  const chatBox = document.getElementById('chatBox');
+  if (chatHistory.length === 0) {
+    chatBox.innerHTML = '<div class="ai-msg">Halo! Saya asisten AI LifeOS. Tanya apa saja.</div>';
+    return;
+  }
+  chatBox.innerHTML = '';
+  chatHistory.forEach(m => {
+    const div = document.createElement('div');
+    div.className = m.role === 'user' ? 'user-msg' : 'ai-msg';
+    div.textContent = m.content;
+    chatBox.appendChild(div);
+  });
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function sendChat() {
+  const apiKey = localStorage.lifeosApiKey;
+  if (!apiKey) { showToast('Masukkan API key dulu.'); return; }
+
+  const input = document.getElementById('chatInput');
+  const chatBox = document.getElementById('chatBox');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const userDiv = document.createElement('div');
+  userDiv.className = 'user-msg';
+  userDiv.textContent = text;
+  chatBox.appendChild(userDiv);
+  chatHistory.push({ role: 'user', content: text });
+  input.value = '';
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  const typing = document.createElement('div');
+  typing.className = 'ai-typing';
+  typing.textContent = 'Mengetik...';
+  chatBox.appendChild(typing);
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: 'Kamu adalah asisten AI di aplikasi LifeOS. Jawab dalam Bahasa Indonesia, singkat, ramah, dan membantu. Kamu mengingat konteks percakapan sebelumnya dalam sesi ini.',
+        messages: chatHistory.map(m => ({ role: m.role, content: m.content }))
+      })
+    });
+
+    typing.remove();
+
+    if (!response.ok) {
+      let errMsg = 'Permintaan gagal (status ' + response.status + ').';
+      if (response.status === 401) errMsg = 'API key tidak valid atau sudah kedaluwarsa.';
+      else if (response.status === 429) errMsg = 'Batas pemakaian API tercapai. Coba lagi nanti.';
+      else if (response.status === 403) errMsg = 'Browser ini diblokir mengakses API langsung (CORS). Gunakan backend proxy untuk fitur ini di produksi.';
+      const errDiv = document.createElement('div');
+      errDiv.className = 'ai-msg';
+      errDiv.style.color = 'var(--warn)';
+      errDiv.textContent = errMsg;
+      chatBox.appendChild(errDiv);
+      chatHistory.pop(); // remove the user message that failed to get a reply
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return;
+    }
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'Tidak ada respon dari AI.';
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'ai-msg';
+    aiDiv.textContent = reply;
+    chatBox.appendChild(aiDiv);
+    chatHistory.push({ role: 'assistant', content: reply });
+    sessionStorage.chatHistory = JSON.stringify(chatHistory);
+  } catch (err) {
+    typing.remove();
+    const aiDiv = document.createElement('div');
+    aiDiv.className = 'ai-msg';
+    aiDiv.style.color = 'var(--warn)';
+    aiDiv.textContent = 'Gagal terhubung. Ini biasanya karena browser memblokir permintaan langsung ke API (CORS) ketika file dibuka secara lokal — coba jalankan lewat server lokal, atau gunakan backend proxy.';
+    chatBox.appendChild(aiDiv);
+    chatHistory.pop();
+  }
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function clearChat() {
+  if (!confirm('Hapus seluruh riwayat chat?')) return;
+  chatHistory = [];
+  sessionStorage.removeItem('chatHistory');
+  renderChatHistory();
+}
+
+initApiKeyUI();
+
+/* ===================== NOTIFICATION ===================== */
+if ('Notification' in window) Notification.requestPermission();
+function scheduleNotification() {
+  const text = document.getElementById('notifText').value || 'Halo dari LifeOS';
+  const delay = (Number(document.getElementById('notifDelay').value) || 5) * 1000;
+  if (!('Notification' in window)) { showToast('Browser tidak mendukung notifikasi.'); return; }
+  if (Notification.permission !== 'granted') { showToast('Izin notifikasi belum diberikan.'); return; }
+  setTimeout(() => new Notification('LifeOS', { body: text }), delay);
+  showToast('Notifikasi dijadwalkan.');
+}
+
+/* ===================== BACKUP / RESTORE ===================== */
+function exportData() {
+  const data = { storage: {}, tanggal: new Date().toLocaleString('id-ID'), versi: 'LifeOS 3.0' };
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    data.storage[key] = localStorage.getItem(key);
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'LifeOS_Backup_' + new Date().toLocaleDateString('id-ID').replace(/\//g,'-') + '.json';
+  a.click();
+}
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      for (const key in data.storage) localStorage.setItem(key, data.storage[key]);
+      showToast('Data dipulihkan. Memuat ulang...');
+      setTimeout(() => location.reload(), 1200);
+    } catch { showToast('File backup tidak valid.'); }
+  };
+  reader.readAsText(file);
+}
+function exportReport() {
+  const name = localStorage.userName || 'Pengguna';
+  const saldo = incomeTotal - expenseTotal;
+  const totalStudyMin = studySessions.reduce((a,b) => a + Number(b.minutes), 0);
+  const bestStreak = habits.reduce((max,h) => Math.max(max, calcStreak(h.log || {})), 0);
+  const now = new Date().toLocaleDateString('id-ID', { year:'numeric', month:'long', day:'numeric' });
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>Laporan LifeOS</title><style>
+    body{font-family:Georgia,serif;padding:48px;color:#1C1C1A;max-width:640px;margin:0 auto;}
+    h1{font-size:26px;} h2{margin-top:28px;font-size:16px;border-bottom:1px solid #E4E2DC;padding-bottom:8px;}
+    table{width:100%;border-collapse:collapse;margin-top:8px;font-family:Arial,sans-serif;font-size:14px;}
+    td{padding:8px 0;border-bottom:1px solid #eee;} .label{color:#777;}
+  </style></head><body>
+    <h1>Laporan LifeOS</h1>
+    <p style="color:#777;font-family:Arial,sans-serif;font-size:13px;">Untuk ${name} &middot; ${now}</p>
+    <h2>Keuangan</h2><table>
+      <tr><td class="label">Total Pemasukan</td><td>Rp${incomeTotal.toLocaleString('id-ID')}</td></tr>
+      <tr><td class="label">Total Pengeluaran</td><td>Rp${expenseTotal.toLocaleString('id-ID')}</td></tr>
+      <tr><td class="label">Sisa Saldo</td><td><b>Rp${saldo.toLocaleString('id-ID')}</b></td></tr></table>
+    <h2>Habit</h2><table>
+      <tr><td class="label">Jumlah Habit Aktif</td><td>${habits.length}</td></tr>
+      <tr><td class="label">Streak Terpanjang</td><td>${bestStreak} hari</td></tr></table>
+    <h2>Studi</h2><table>
+      <tr><td class="label">Total Waktu Belajar</td><td>${totalStudyMin} menit (${(totalStudyMin/60).toFixed(1)} jam)</td></tr>
+      <tr><td class="label">Jumlah Sesi</td><td>${studySessions.length}</td></tr></table>
+    <h2>Tugas</h2><table>
+      <tr><td class="label">To Do Selesai</td><td>${todos.filter(t=>t.done).length} / ${todos.length}</td></tr></table>
+  </body></html>`);
+  win.document.close();
+  setTimeout(() => win.print(), 400);
+}
+
+/* ===================== SETTINGS ===================== */
+const themeColorEl = document.getElementById('themeColor');
+const fontSlider = document.getElementById('fontSize');
+const fontValueEl = document.getElementById('fontValue');
+fontSlider.oninput = function() {
+  fontValueEl.textContent = this.value;
+  document.documentElement.style.setProperty('--fontSize', this.value + 'px');
+};
+function saveSettings() {
+  localStorage.userName = document.getElementById('userName').value;
+  localStorage.themeColor = themeColorEl.value;
+  localStorage.fontSize = fontSlider.value;
+  document.documentElement.style.setProperty('--accent', themeColorEl.value);
+  document.documentElement.style.setProperty('--fontSize', fontSlider.value + 'px');
+  renderFinanceCharts(); renderStudyChart();
+  showToast('Pengaturan disimpan.');
+  updateDashboard();
+}
+function resetSettings() {
+  if (!confirm('Reset semua pengaturan tampilan?')) return;
+  ['userName','themeColor','fontSize'].forEach(k => localStorage.removeItem(k));
+  location.reload();
+}
+function toggleTheme() {
+  document.body.classList.toggle('dark');
+  localStorage.darkMode = document.body.classList.contains('dark') ? '1' : '';
+  setTimeout(() => { renderFinanceCharts(); renderStudyChart(); }, 50);
+}
+function loadSettings() {
+  if (localStorage.userName) document.getElementById('userName').value = localStorage.userName;
+  if (localStorage.themeColor) {
+    themeColorEl.value = localStorage.themeColor;
+    document.documentElement.style.setProperty('--accent', localStorage.themeColor);
+  }
+  if (localStorage.fontSize) {
+    fontSlider.value = localStorage.fontSize;
+    fontValueEl.textContent = localStorage.fontSize;
+    document.documentElement.style.setProperty('--fontSize', localStorage.fontSize + 'px');
+  }
+  if (localStorage.darkMode === '1') document.body.classList.add('dark');
+}
+loadSettings();
+
+/* ===================== SERVICE WORKER ===================== */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
